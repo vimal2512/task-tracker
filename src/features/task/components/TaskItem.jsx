@@ -1,15 +1,48 @@
 import React from "react";
+import { useState } from "react";
 
-const TaskItem = ({task, onToggle, onDelete}) => {
+const TaskItem = ({task, onToggle, onDelete, onUpdate}) => {
   console.log("Render TaskItem:", task.title);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(task.title);
+
+  const handleUpdate = () => {
+    const trimmed = editValue.trim();
+
+    if(trimmed && trimmed !== task.title){
+      onUpdate(task.id, trimmed);
+    }
+
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if(e.key === "Enter") handleUpdate();
+
+    if(e.key === "Escape") {
+      setEditValue(task.title);
+      setIsEditing(false);
+    }
+  }
+
    return(
     <li>
+      {isEditing ? (
+        <input 
+           value={editValue}
+           autoFocus
+           onChange={(e) => setEditValue(e.target.value)}
+           onBlur={handleUpdate}
+           onKeyDown={handleKeyDown}
+           />
+      ):(
+
+ <div>
         <span
           onClick={() => onToggle(task.id)}
-          style={{
-            textDecoration: task.completed ? "line-through" : "none",
-            cursor: "pointer"
-          }}
+          onDoubleClick={() => setIsEditing(true)}
+          className={task.completed}
         >
           {task.title}
         </span>
@@ -17,7 +50,12 @@ const TaskItem = ({task, onToggle, onDelete}) => {
         <button onClick={() => onDelete(task.id)}>
             Cancel
         </button>
+        </div>
+
+      )}
+     
     </li>
+    
    )
 }
 

@@ -1,7 +1,7 @@
 import TaskItem from "./components/TaskItem";
 
 
-const TaskList = ({tasks, toggleTask, deleteTask}) => {
+const TaskList = ({tasks, toggleTask, deleteTask, updateTask}) => {
   
   if(!tasks.length) {
     return <p>No tasks found</p>
@@ -16,6 +16,7 @@ const TaskList = ({tasks, toggleTask, deleteTask}) => {
            task={task} 
            onToggle={toggleTask} 
            onDelete={deleteTask}
+           onUpdate={updateTask}
         />
       ))}
     </ul>

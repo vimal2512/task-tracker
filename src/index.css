@@ -1,0 +1,164 @@
+/* 🌍 RESET */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background: linear-gradient(to right, #eef2f7, #f9fbfd);
+  color: #222;
+}
+
+/* 📦 MAIN CARD */
+.container {
+  max-width: 520px;
+  margin: 60px auto;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* 🧠 HEADER */
+h1 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+p {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}
+
+/* ✏️ INPUT AREA */
+.task-input {
+  display: flex;
+  margin-top: 20px;
+}
+
+.task-input input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  outline: none;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.task-input input:focus {
+  border-color: #111;
+}
+
+.task-input button {
+  margin-left: 10px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #111;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* 📋 TASK LIST */
+ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+li {
+  background: #f7f9fc;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.2s;
+}
+
+li:hover {
+  transform: scale(1.01);
+  background: #f1f4f9;
+}
+
+/* ✔ TASK TEXT */
+li span {
+  cursor: pointer;
+  flex: 1;
+}
+
+/* ✏️ EDIT INPUT INSIDE LIST */
+li input {
+  flex: 1;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* ❌ DELETE BUTTON */
+li button {
+  background: transparent;
+  border: none;
+  color: #999;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+li button:hover {
+  color: crimson;
+}
+
+/* ✅ COMPLETED TASK */
+.completed {
+  text-decoration: line-through;
+  color: #999;
+}
+
+/* 🎛 FILTER BAR */
+.filter-bar {
+  margin-top: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* 🔘 FILTER BUTTONS */
+.filter-bar button {
+  background: #eef1f6;
+  color: #333;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.2s;
+}
+
+.filter-bar button:hover {
+  background: #111;
+  color: #fff;
+}
+
+/* ⭐ ACTIVE FILTER */
+.filter-bar .active {
+  background: #111;
+  color: #fff;
+}
+
+/* 🧹 CLEAR COMPLETED */
+.clear-btn {
+  background: transparent;
+  color: crimson;
+  font-weight: 500;
+}
+
+.clear-btn:hover {
+  text-decoration: underline;
+}

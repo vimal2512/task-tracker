@@ -1,13 +1,27 @@
 import React from "react";
 
-const FilterBar = ({setFilter}) =>{
+const FilterBar = ({filter,setFilter,completedTasks,clearCompleted}) =>{
     console.log("Render Filter")
     
+  
+
     return(
-        <div>
-           <button onClick={() => setFilter("all")}>All</button>
-           <button onClick={()=> setFilter("active")}>Active</button>
-           <button onClick={()=> setFilter("completed")}>Completed</button>
+        <div className="filter-bar">
+           <button onClick={() => setFilter("all")} className={filter === "all" ? "active" : ""}>
+             All
+           </button>
+           <button onClick={()=> setFilter("active")} className={filter === "active" ? "active" : ""}>
+             Active
+           </button>
+           <button onClick={()=> setFilter("completed")} className={filter === "completed" ? "active" : ""}>
+             Completed
+            </button>
+
+           {completedTasks > 0 && (
+            <button className="clear-btn" onClick={clearCompleted}>
+                Clear Completed
+            </button>
+           )}
         </div>
     )
 }

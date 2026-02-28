@@ -14,6 +14,7 @@ const TaskInput = ({addTask}) => {
     }
 
     return(
+        <div className="task-input">
         <form action="" onSubmit={handleSubmit}>
           <input 
            type="text" 
@@ -24,6 +25,7 @@ const TaskInput = ({addTask}) => {
 
           <button type="submit">Add</button>
         </form>
+        </div>
     )
 }
 
