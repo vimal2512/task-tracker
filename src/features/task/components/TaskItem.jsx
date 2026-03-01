@@ -3,6 +3,7 @@ import { useState } from "react";
 
 const TaskItem = ({task, onToggle, onDelete, onUpdate}) => {
   console.log("Render TaskItem:", task.title);
+  console.log("toggle fn changed:", onToggle);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(task.title);
@@ -42,7 +43,7 @@ const TaskItem = ({task, onToggle, onDelete, onUpdate}) => {
         <span
           onClick={() => onToggle(task.id)}
           onDoubleClick={() => setIsEditing(true)}
-          className={task.completed}
+          className={task.completed ? "completed" : ""}
         >
           {task.title}
         </span>

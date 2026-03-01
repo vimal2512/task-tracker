@@ -2,22 +2,22 @@
 // import TaskInput from "../features/task/TaskInput";
 // import TaskList from "../features/task/TaskList";
 // import FilterBar from "../features/task/components/FilterBar";
+// import { useCallback } from "react";
 
 // const TaskPage = () => {
 //     console.log("Render TaskPage");
-//     const [tasks, setTasks] = useState([]);
-//     // const[filter, setFilter] = useState("all");
 
-//     const[filter,setFilter] = useState(() => {
+//     const [tasks, setTasks] = useState([]);
+
+//     const [filter, setFilter] = useState(() => {
 //         return localStorage.getItem("filter") || "all"
-//     })
+//     });
 
 //     useEffect(() => {
 //         localStorage.setItem("filter", filter)
-//     },[filter]);
+//     }, [filter]);
 
-//     const addTask = (title) => {
-
+//     const addTask = useCallback((title) => {
 //         const newTask = {
 //             id: crypto.randomUUID(),
 //             title,
@@ -25,45 +25,54 @@
 //         };
 
 //         setTasks((prev) => [...prev, newTask]);
-//     };
+//     },[]);
 
-//     const toggleTask = (id) => {
-
+//     const toggleTask = useCallback((id) => {
 //         setTasks((prev) =>
 //             prev.map((t) =>
-//                 t.id === id ? {...t, completed: !t.completed} : t
+//                 t.id === id ? { ...t, completed: !t.completed } : t
 //             )
 //         );
-//     };
+//     },[]);
 
-//     const deleteTask = (id) => {
-//         setTasks((prev) => prev.filter((t)=> t.id !== id));
-//     }
+//     const deleteTask = useCallback((id) => {
+//         setTasks((prev) => prev.filter((t) => t.id !== id));
+//     },[]);
 
-//    const updateTask = (id, newTitle) => {
-//     setTasks(prev =>
-//         prev.map(t =>
-//             t.id === id ? {...t, title: newTitle } : t
-//         )
-//     )
-//    }
+//     const updateTask = useCallback((id, newTitle) => {
+//         setTasks(prev =>
+//             prev.map(t =>
+//                 t.id === id ? { ...t, title: newTitle } : t
+//             )
+//         );
+//     },[]);
 
-//    const clearCompleted = () => {
-//     setTasks(prev => prev.filter(task => !task.completed));
-//    }
+//     const clearCompleted = useCallback(() => {
+//         setTasks(prev => prev.filter(task => !task.completed));
+//     },[]);
 
 //     const filteredTasks = tasks.filter((task) => {
-//         if(filter === "active") return !task.completed;
-//         if(filter === "completed") return task.completed;
-
+//         if (filter === "active") return !task.completed;
+//         if (filter === "completed") return task.completed;
 //         return true;
-//     })
+//     });
 
 //     const totalTasks = tasks.length;
 //     const completedTasks = tasks.filter(t => t.completed).length;
 //     const activeTasks = totalTasks - completedTasks;
-    
-//     return(
+
+
+//     const testBatching = () => {
+//         console.log("click start");
+
+//         setTasks(prev => [...prev]);
+//         setFilter("all");
+//         setFilter("active");
+
+//         console.log("click end");
+//     }
+
+//     return (
 //         <div>
 //             <h1>Task Tracker</h1>
 
@@ -71,33 +80,391 @@
 //                 Total: {totalTasks} | Active: {activeTasks} | Completed: {completedTasks}
 //             </p>
 
-//              <TaskInput addTask={addTask}/>
+//             <TaskInput addTask={addTask} />
 
-//              <TaskList
-//                 tasks={filteredTasks}
-//                 toggleTask={toggleTask}
-//                 deleteTask={deleteTask}
-//                 updateTask={updateTask}
-//              />
+//             {totalTasks === 0 ? (
+//                 <p>No tasks yet. Add one.</p>
+//             ) : (
+//                 <TaskList
+//                     tasks={filteredTasks}
+//                     toggleTask={toggleTask}
+//                     deleteTask={deleteTask}
+//                     updateTask={updateTask}
+//                 />
+//             )}
 
-//              <FilterBar filter={filter} setFilter={setFilter}/>
+//             <FilterBar
+//                 filter={filter}
+//                 setFilter={setFilter}
+//                 completedTasks={completedTasks}
+//                 clearCompleted={clearCompleted}
+//             />
 
-//              <div>
-//                 <button onClick={() => setFilter("all")}>All</button>
-//                 <button onClick={() => setFilter("active")}>Active</button>
-//                 <button onClick={()=> setFilter("completed")}>Completed</button>
-//                 {/* <button onClick={clearCompleted}>Clear Completed</button> */}
-
-//                 {completedTasks > 0 && (
-//                     <button onClick={clearCompleted}>
-//                         Clear Completed
-//                     </button>
-//                 )}
-//              </div>
+//             <button onClick={testBatching}>Test Batching</button>
 //         </div>
 //     );
 // };
 
+// export default TaskPage;
+
+
+
+
+// Server state using react query
+
+
+// import { useEffect, useState, useCallback } from "react";
+// import TaskInput from "../features/task/TaskInput";
+// import TaskList from "../features/task/TaskList";
+// import FilterBar from "../features/task/components/FilterBar";
+
+// import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+// import { fetchTasks, addTaskApi, toggleTaskApi, deleteTaskApi, updateTaskApi } from "../services/taskService";
+
+// const TaskPage = () => {
+//     console.log("Render TaskPage");
+
+//    const queryClient = useQueryClient();
+
+//    // Server state
+
+//    const { data: tasks = [], isLoading } = useQuery({
+//       queryKey: ["tasks"],
+//       queryFn: fetchTasks
+//    })
+
+// // UI State
+// const[filter, setFilter] = useState(()=> {
+//     return localStorage.getItem("filter") || "all"
+// })
+
+// useEffect(() => {
+//     localStorage.setItem("filter", filter);
+// },[filter]);
+
+// // Add Task
+// const addTaskMutation = useMutation({
+//     mutationFn: addTaskApi,
+//     onSuccess: () => queryClient.invalidateQueries({queryKey: ["tasks"]})
+// });
+
+
+// const addTask = useCallback((title) => {
+//     addTaskMutation.mutate(title);
+// },[addTaskMutation]);
+
+// // Toggle task
+
+// const toggleTaskMutation = useMutation({
+//     mutationFn: toggleTaskApi,
+//     onSuccess: () => queryClient.invalidateQueries(["tasks"])
+// });
+
+
+// const toggleTask = useCallback((id) => {
+//     toggleTaskMutation.mutate(id);
+// },[toggleTaskMutation]);
+
+// // Delete task
+
+// const deleteTaskMutation = useMutation({
+//     mutationFn: deleteTaskApi,
+//     onSuccess: () => queryClient.invalidateQueries(["tasks"])
+// });
+
+// const deleteTask = useCallback((id) => {
+//     deleteTaskMutation.mutate(id);
+// }, [deleteTaskMutation])
+
+
+// // Clear completed
+
+// const clearCompleted = () => {
+//     const completed = tasks.filter(t => t.completed);
+
+//     completed.forEach(t => {
+//         deleteTaskMutation.mutate(t.id);
+//     });
+// };
+
+// // Filtered Tasks
+
+// const filteredTasks = tasks.filter((task) => {
+//     if(filter === "active") return !task.completed;
+//     if(filter === "completed") return task.completed;
+
+//     return true;
+// })
+
+// // Update Task
+
+// const updateTaskMutation = useMutation({
+//   mutationFn: updateTaskApi,
+//   onSuccess: () =>
+//     queryClient.invalidateQueries({ queryKey: ["tasks"] })
+// });
+
+// const updateTask = useCallback((id, title) => {
+//   updateTaskMutation.mutate({ id, title });
+// }, [updateTaskMutation]);
+
+
+// // Counters
+// const totalTasks = tasks.length;
+// const completedTasks = tasks.filter(t => t.completed).length;
+// const activeTasks = totalTasks - completedTasks;
+
+// if(isLoading) return <p>Loading tasks...</p>
+//     return (
+//         <div className="container">
+//           <h1>Task Tracker</h1>
+
+//           <p>
+//             Total: {totalTasks} | Active : {activeTasks} | Completed: {completedTasks}
+//           </p>
+
+//           <TaskInput addTask={addTask}/>
+
+//           {totalTasks === 0 ? (
+//             <p>No tasks yet. Add one.</p>
+//           ):(
+//             <TaskList 
+//               tasks={filteredTasks}
+//               toggleTask={toggleTask}
+//               deleteTask={deleteTask}
+//                updateTask={updateTask}
+//             />
+//           )}
+
+//           <FilterBar
+//               filter={filter}
+//               setFilter={setFilter}
+//               completedTasks={completedTasks}
+//               clearCompleted={clearCompleted}
+//           />
+//         </div>
+//     );
+// };
+
+// export default TaskPage;
+
+
+
+
+// import { useEffect, useState, useCallback } from "react";
+// import TaskInput from "../features/task/TaskInput";
+// import TaskList from "../features/task/TaskList";
+// import FilterBar from "../features/task/components/FilterBar";
+
+// import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+// import {
+//   fetchTasks,
+//   addTaskApi,
+//   toggleTaskApi,
+//   deleteTaskApi,
+//   updateTaskApi
+// } from "../services/taskService";
+
+// const TaskPage = () => {
+//   console.log("Render TaskPage");
+
+//   const queryClient = useQueryClient();
+
+//   // 🌐 SERVER STATE
+//   const { data: tasks = [], isLoading } = useQuery({
+//     queryKey: ["tasks"],
+//     queryFn: fetchTasks
+//   });
+
+//   // 🎛 UI STATE
+//   const [filter, setFilter] = useState(() => {
+//     return localStorage.getItem("filter") || "all";
+//   });
+
+//   useEffect(() => {
+//     localStorage.setItem("filter", filter);
+//   }, [filter]);
+
+//   // ➕ ADD TASK (OPTIMISTIC)
+//   const addTaskMutation = useMutation({
+//     mutationFn: addTaskApi,
+
+//     onMutate: async (title) => {
+//       await queryClient.cancelQueries({ queryKey: ["tasks"] });
+
+//       const previousTasks = queryClient.getQueryData(["tasks"]);
+
+//       const optimisticTask = {
+//         id: crypto.randomUUID(),
+//         title,
+//         completed: false
+//       };
+
+//       queryClient.setQueryData(["tasks"], (old = []) => [
+//         ...old,
+//         optimisticTask
+//       ]);
+
+//       return { previousTasks };
+//     },
+
+//     onError: (err, title, context) => {
+//       queryClient.setQueryData(["tasks"], context.previousTasks);
+//     },
+
+//     onSettled: () => {
+//       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+//     }
+//   });
+
+//   const addTask = useCallback((title) => {
+//     addTaskMutation.mutate(title);
+//   }, [addTaskMutation]);
+
+//   // 🔁 TOGGLE TASK (OPTIMISTIC)
+//   const toggleTaskMutation = useMutation({
+//     mutationFn: toggleTaskApi,
+
+//     onMutate: async (id) => {
+//       await queryClient.cancelQueries({ queryKey: ["tasks"] });
+
+//       const previousTasks = queryClient.getQueryData(["tasks"]);
+
+//       queryClient.setQueryData(["tasks"], (old = []) =>
+//         old.map((task) =>
+//           task.id === id
+//             ? { ...task, completed: !task.completed }
+//             : task
+//         )
+//       );
+
+//       return { previousTasks };
+//     },
+
+//     onError: (err, id, context) => {
+//       queryClient.setQueryData(["tasks"], context.previousTasks);
+//     },
+
+//     onSettled: () => {
+//       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+//     }
+//   });
+
+//   const toggleTask = useCallback((id) => {
+//     toggleTaskMutation.mutate(id);
+//   }, [toggleTaskMutation]);
+
+//   // ❌ DELETE TASK (OPTIMISTIC)
+//   const deleteTaskMutation = useMutation({
+//     mutationFn: deleteTaskApi,
+
+//     onMutate: async (id) => {
+//       await queryClient.cancelQueries({ queryKey: ["tasks"] });
+
+//       const previousTasks = queryClient.getQueryData(["tasks"]);
+
+//       queryClient.setQueryData(["tasks"], (old = []) =>
+//         old.filter((task) => task.id !== id)
+//       );
+
+//       return { previousTasks };
+//     },
+
+//     onError: (err, id, context) => {
+//       queryClient.setQueryData(["tasks"], context.previousTasks);
+//     },
+
+//     onSettled: () => {
+//       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+//     }
+//   });
+
+//   const deleteTask = useCallback((id) => {
+//     deleteTaskMutation.mutate(id);
+//   }, [deleteTaskMutation]);
+
+//   // ✏️ UPDATE TASK TITLE (OPTIMISTIC)
+//   const updateTaskMutation = useMutation({
+//     mutationFn: updateTaskApi,
+
+//     onMutate: async ({ id, title }) => {
+//       await queryClient.cancelQueries({ queryKey: ["tasks"] });
+
+//       const previousTasks = queryClient.getQueryData(["tasks"]);
+
+//       queryClient.setQueryData(["tasks"], (old = []) =>
+//         old.map((task) =>
+//           task.id === id ? { ...task, title } : task
+//         )
+//       );
+
+//       return { previousTasks };
+//     },
+
+//     onError: (err, variables, context) => {
+//       queryClient.setQueryData(["tasks"], context.previousTasks);
+//     },
+
+//     onSettled: () => {
+//       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+//     }
+//   });
+
+//   const updateTask = useCallback((id, title) => {
+//     updateTaskMutation.mutate({ id, title });
+//   }, [updateTaskMutation]);
+
+//   // 🧹 CLEAR COMPLETED
+//   const clearCompleted = () => {
+//     tasks
+//       .filter((t) => t.completed)
+//       .forEach((t) => deleteTaskMutation.mutate(t.id));
+//   };
+
+//   // 🎯 FILTER
+//   const filteredTasks = tasks.filter((task) => {
+//     if (filter === "active") return !task.completed;
+//     if (filter === "completed") return task.completed;
+//     return true;
+//   });
+
+//   // 📊 COUNTERS
+//   const totalTasks = tasks.length;
+//   const completedTasks = tasks.filter((t) => t.completed).length;
+//   const activeTasks = totalTasks - completedTasks;
+
+//   if (isLoading) return <p>Loading tasks...</p>;
+
+//   return (
+//     <div className="container">
+//       <h1>Task Tracker</h1>
+
+//       <p>
+//         Total: {totalTasks} | Active: {activeTasks} | Completed: {completedTasks}
+//       </p>
+
+//       <TaskInput addTask={addTask} />
+
+//       {totalTasks === 0 ? (
+//         <p>No tasks yet. Add one.</p>
+//       ) : (
+//         <TaskList
+//           tasks={filteredTasks}
+//           toggleTask={toggleTask}
+//           deleteTask={deleteTask}
+//           updateTask={updateTask}
+//         />
+//       )}
+
+//       <FilterBar
+//         filter={filter}
+//         setFilter={setFilter}
+//         completedTasks={completedTasks}
+//         clearCompleted={clearCompleted}
+//       />
+//     </div>
+//   );
+// };
 
 // export default TaskPage;
 
@@ -106,93 +473,81 @@ import { useEffect, useState } from "react";
 import TaskInput from "../features/task/TaskInput";
 import TaskList from "../features/task/TaskList";
 import FilterBar from "../features/task/components/FilterBar";
+import { useTasks } from "../hooks/useTasks";
 
 const TaskPage = () => {
-    console.log("Render TaskPage");
+  console.log("Render TaskPage");
 
-    const [tasks, setTasks] = useState([]);
+  // 🧠 SERVER STATE (from custom hook)
+  const {
+    tasks,
+    isLoading,
+    addTask,
+    toggleTask,
+    deleteTask,
+    updateTask
+  } = useTasks();
 
-    const [filter, setFilter] = useState(() => {
-        return localStorage.getItem("filter") || "all"
-    });
+  // 🎛 UI STATE
+  const [filter, setFilter] = useState(() => {
+    return localStorage.getItem("filter") || "all";
+  });
 
-    useEffect(() => {
-        localStorage.setItem("filter", filter)
-    }, [filter]);
+  useEffect(() => {
+    localStorage.setItem("filter", filter);
+  }, [filter]);
 
-    const addTask = (title) => {
-        const newTask = {
-            id: crypto.randomUUID(),
-            title,
-            completed: false
-        };
+  // 🧹 CLEAR COMPLETED (UI orchestration only)
+  const clearCompleted = () => {
+    tasks
+      .filter((t) => t.completed)
+      .forEach((t) => deleteTask(t.id));
+  };
 
-        setTasks((prev) => [...prev, newTask]);
-    };
+  // 🎯 FILTER
+  const filteredTasks = tasks.filter((task) => {
+    if (filter === "active") return !task.completed;
+    if (filter === "completed") return task.completed;
+    return true;
+  });
 
-    const toggleTask = (id) => {
-        setTasks((prev) =>
-            prev.map((t) =>
-                t.id === id ? { ...t, completed: !t.completed } : t
-            )
-        );
-    };
+  // 📊 COUNTERS
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter((t) => t.completed).length;
+  const activeTasks = totalTasks - completedTasks;
 
-    const deleteTask = (id) => {
-        setTasks((prev) => prev.filter((t) => t.id !== id));
-    };
+  if (isLoading) return <p>Loading tasks...</p>;
 
-    const updateTask = (id, newTitle) => {
-        setTasks(prev =>
-            prev.map(t =>
-                t.id === id ? { ...t, title: newTitle } : t
-            )
-        );
-    };
+  return (
+    <div className="container">
+      <h1>Task Tracker</h1>
 
-    const clearCompleted = () => {
-        setTasks(prev => prev.filter(task => !task.completed));
-    };
+      <p>
+        Total: {totalTasks} | Active: {activeTasks} | Completed: {completedTasks}
+      </p>
 
-    const filteredTasks = tasks.filter((task) => {
-        if (filter === "active") return !task.completed;
-        if (filter === "completed") return task.completed;
-        return true;
-    });
+      <TaskInput addTask={addTask} />
 
-    const totalTasks = tasks.length;
-    const completedTasks = tasks.filter(t => t.completed).length;
-    const activeTasks = totalTasks - completedTasks;
+      {totalTasks === 0 ? (
+        <p>No tasks yet. Add one.</p>
+      ) : (
+        <TaskList
+          tasks={filteredTasks}
+          toggleTask={toggleTask}
+          deleteTask={deleteTask}
+          updateTask={updateTask}
+        />
+      )}
 
-    return (
-        <div>
-            <h1>Task Tracker</h1>
-
-            <p>
-                Total: {totalTasks} | Active: {activeTasks} | Completed: {completedTasks}
-            </p>
-
-            <TaskInput addTask={addTask} />
-
-            {totalTasks === 0 ? (
-                <p>No tasks yet. Add one.</p>
-            ) : (
-                <TaskList
-                    tasks={filteredTasks}
-                    toggleTask={toggleTask}
-                    deleteTask={deleteTask}
-                    updateTask={updateTask}
-                />
-            )}
-
-            <FilterBar
-                filter={filter}
-                setFilter={setFilter}
-                completedTasks={completedTasks}
-                clearCompleted={clearCompleted}
-            />
-        </div>
-    );
+      <FilterBar
+        filter={filter}
+        setFilter={setFilter}
+        completedTasks={completedTasks}
+        clearCompleted={clearCompleted}
+      />
+    </div>
+  );
 };
 
 export default TaskPage;
+
