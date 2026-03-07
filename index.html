@@ -6,14 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>task-tracker</title>
   </head>
+
   <body>
     <div id="root"></div>
+
     <script type="module" src="/src/main.jsx"></script>
 
-    <script src="http://localhost:5000/tracker.js"></script>
+    <!-- Analytics Tracker -->
+    <script src="https://analytics-dashboard-server.onrender.com/tracker.js"></script>
 
-   <script>
-      analytics.init("trk_l39nw6n11x");
-   </script>
+    <script>
+      analytics.init("trk_tasktracker");
+    </script>
+
   </body>
 </html>
