@@ -12,7 +12,7 @@ const TaskList = ({tasks, toggleTask, deleteTask, updateTask}) => {
     <ul>
       {tasks.map((task) => (
         <TaskItem  
-           key={task.id} 
+           key={task._id} 
            task={task} 
            onToggle={toggleTask} 
            onDelete={deleteTask}
